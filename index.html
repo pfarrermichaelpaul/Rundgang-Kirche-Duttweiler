@@ -550,7 +550,9 @@
         <span class="station-arrow" aria-hidden="true">›</span>`;
       button.addEventListener('click', () => {
         goToStation(index);
-        closeMenu();
+        // Auf kleinen Displays nach der Auswahl schließen;
+        // auf Desktop bleibt das Seitenmenü für eine leichtere Bedienung offen.
+        if (window.matchMedia('(max-width: 680px)').matches) closeMenu();
       });
       li.appendChild(button);
       stationList.appendChild(li);
@@ -558,7 +560,13 @@
 
     function openMenu() {
       drawer.classList.add('open');
-      backdrop.classList.add('open');
+      // Der dunkle Hintergrund ist nur auf kleinen Displays sinnvoll.
+      // Am Desktop bleibt das Panorama neben dem geöffneten Menü bedienbar.
+      if (window.matchMedia('(max-width: 680px)').matches) {
+        backdrop.classList.add('open');
+      } else {
+        backdrop.classList.remove('open');
+      }
       drawer.setAttribute('aria-hidden', 'false');
       openMenuButton.setAttribute('aria-expanded', 'true');
     }
@@ -595,12 +603,21 @@
     closeMenuButton.addEventListener('click', closeMenu);
     backdrop.addEventListener('click', closeMenu);
 
+    window.addEventListener('resize', () => {
+      if (drawer.classList.contains('open')) {
+        if (window.matchMedia('(max-width: 680px)').matches) backdrop.classList.add('open');
+        else backdrop.classList.remove('open');
+      }
+    });
+
     document.getElementById('prevScene').addEventListener('click', () => goToStation(currentIndex - 1));
     document.getElementById('nextScene').addEventListener('click', () => goToStation(currentIndex + 1));
 
     startTourButton.addEventListener('click', () => {
       started = true;
       intro.classList.add('hidden');
+      // Das Stationsmenü erscheint direkt aufgeklappt.
+      openMenu();
     });
 
     viewer.on('scenechange', sceneId => {
